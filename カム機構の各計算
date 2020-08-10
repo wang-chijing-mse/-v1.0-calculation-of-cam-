@@ -66,6 +66,16 @@ int main() {
 		}
 	}
 
+//読み込んだデータを整理して出力
+	cout << "角度[°]：変位[mm]" << endl;
+	camnum* obj = new camnum[i];
+	for (int k = 0; k < i; k++) {
+		obj[k].setangle(vec[k].getangle());
+		obj[k].setdis(vec[k].getdis());
+		cout << obj[k].getangle() << ":" << obj[k].getdis() << endl;
+	}
+	delete[] obj;
+
 //公式を利用してピッチ円半径を求める
 	rp = h * cos(pressureagnle) / ((vec[y + 1].getangle() - vec[y].getangle()) * sin(pressureagnle));
 
