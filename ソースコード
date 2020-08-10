@@ -1,0 +1,74 @@
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<vector>
+#include <cmath>
+using namespace std;
+
+static const double pi = 3.141592653589793;
+
+double pressureagnle = 30 / pi;//圧力角の設定
+double rp;//ピッチ円半径を設定
+double h=32;
+
+//カムの各角度の変位と傾きを収納するクラス
+class camnum {
+	double angle;
+	double dis;
+	double slope;
+public:
+	void setangle(double newangle) { angle = newangle; }
+	double getangle() { return angle; }
+	void setdis(double newdis) { dis = newdis; }
+	double getdis() { return dis; }
+	void setslope(double newslope) { slope = newslope; }
+	double getslope() { return slope; }
+};
+
+//傾きを計算する関数
+double calslope(camnum a, camnum b) {
+	double i;
+	i = (b.getdis() - a.getdis())*pi / (b.getangle() - a.getangle());
+	return i;
+}
+
+
+int main() {
+
+//カムのデータを読み込む
+	ifstream datafile("cam.dat");
+	string m, n;
+	vector<camnum> vec;
+	vec.emplace_back();
+
+	int i = 0;
+	while (datafile >> m >> n) {
+		vec[i].setangle(stod(m));
+		vec[i].setdis(stod(n));
+		vec.emplace_back();
+		i++;
+	}
+
+//傾きを計算
+	double d;
+	for (int k = 0; k < i; k++) {
+		d = calslope(vec[k], vec[k + 1]);
+		vec[k].setslope(d);
+	}
+
+//傾きが一番大きいところを探してピッチ点にする
+	int y = 0;
+	double max = vec[0].getslope();
+	for (int x = 0; x < i; x++) {
+		if (max < vec[x + 1].getslope()) {
+			max = vec[x + 1].getslope();
+			y = x + 1;
+		}
+	}
+
+//公式を利用してピッチ円半径を求める
+	rp = h * cos(pressureagnle) / ((vec[y + 1].getangle() - vec[y].getangle()) * sin(pressureagnle));
+
+	cout << "ピッチ点の位置：角度：" << vec[y].getangle() << "°，変位：" << vec[y].getdis() << "mm" <<endl;
+	cout << "ピッチ円半径は：" << rp << "mm"<<endl;
+}
